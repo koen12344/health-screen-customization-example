@@ -54,7 +54,7 @@ function hsce_add_async_test($tests){
 		'async' => [
 			'hsce_custom_async_test' => [
 				'label' => __('My custom async test', 'health-screen-customization-example'),
-				'test' => 'hsce_async_test',
+				'test' => 'hsce-async-test',
 				'skip_cron' => false,
 				'has_rest' => false,
 				'async_direct_test' => 'do_hsce_async_test',
@@ -100,7 +100,7 @@ function do_hsce_async_test(){
 
 	return $test;
 }
-add_action('wp_ajax_health-check-hsce-async_test', 'do_hsce_async_test');
+add_action('wp_ajax_health-check-hsce-async-test', 'do_hsce_async_test');
 
 
 function hsce_add_debug_info( $debug_info ) {
