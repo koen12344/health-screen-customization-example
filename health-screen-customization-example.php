@@ -43,7 +43,7 @@ function hsce_do_test() {
 			'color' => 'blue', //Choice of blue, green, red, orange, purple or gray
 		],
 		'description' => $description,
-		'actions' => '', //Link or button (HTML) where the user can find additional info
+		'actions' => sprintf('<a href="#">%s</a>', __('Check the plugin log')), //Link or button (HTML) where the user can find additional info
 		'test' => 'hsce_custom_test'
 	];
 }
@@ -57,7 +57,7 @@ function hsce_add_async_test($tests){
 				'test' => 'hsce-async-test',
 				'skip_cron' => false,
 				'has_rest' => false,
-				'async_direct_test' => 'do_hsce_async_test',
+				'async_direct_test' => 'hsce_do_async_test',
 			]
 		]
 	]);
@@ -65,13 +65,7 @@ function hsce_add_async_test($tests){
 add_filter('site_status_tests', 'hsce_add_async_test');
 
 
-function do_hsce_async_test(){
-	if (defined('DOING_AJAX') && DOING_AJAX &&
-		!wp_verify_nonce( $_REQUEST['_wpnonce'], 'health-check-site-status' )
-	) {
-		wp_send_json_error();
-	}
-
+function hsce_do_async_test(){
 	$long_test = function(){ sleep(2); return true; };
 	$result = $long_test();
 
@@ -82,7 +76,7 @@ function do_hsce_async_test(){
 		__('Description when test failed', 'health-screen-customization-example')
 	);
 
-	$test = [
+	return [
 		'label' => $label,
 		'status' => $status,
 		'badge' => [
@@ -93,14 +87,16 @@ function do_hsce_async_test(){
 		'actions' => '',
 		'test' => 'hsce_custom_async_test'
 	];
-
-	if (defined('DOING_AJAX') && DOING_AJAX) {
-		wp_send_json_success($test);
-	}
-
-	return $test;
 }
-add_action('wp_ajax_health-check-hsce-async-test', 'do_hsce_async_test');
+
+function hsce_ajax_async_test(){
+	if(!wp_verify_nonce($_REQUEST['_wpnonce'], 'health-check-site-status')){
+		wp_send_json_error();
+	}
+	wp_send_json_success(hsce_do_async_test());
+}
+
+add_action('wp_ajax_health-check-hsce-async-test', 'hsce_ajax_async_test');
 
 
 function hsce_add_debug_info( $debug_info ) {
